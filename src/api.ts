@@ -7,8 +7,7 @@ import Cookies from '@root/cookies';
 export const PreviewCookie = "io.prismic.preview";
 export const ExperimentCookie = "io.prismic.experiment";
 
-
-export interface IRef {
+export interface Ref {
   ref: string;
   label: string;
   isMaster: string;
@@ -16,113 +15,42 @@ export interface IRef {
   id: string;
 }
 
-export class Ref implements IRef {
-  ref: string;
-  label: string;
-  isMaster: string;
-  scheduledAt: string;
-  id: string;
-
-  constructor(ref: string, label: string, isMaster: string, scheduledAt: string, id: string) {
-    this.ref = ref;
-    this.label = label;
-    this.isMaster = isMaster;
-    this.scheduledAt = scheduledAt;
-    this.id = id;
-  }
-}
-
-
-export interface IField {
+export interface Field {
   [key: string]: string;
   value: string;
 }
 
-export interface IForm {
+export interface Form {
   fields: any;
   action: string;
   name: string;
   rel: string;
   form_method: string;
   enctype: string;
-
-  getField(field: string): IField | undefined
-  getFieldSafe(field: string): IField
 }
 
-export class Form implements IForm {
-  fields: any;
-  action: string;
-  name: string;
-  rel: string;
-  form_method: string;
-  enctype: string;
-
-  constructor(
-    fields: any,
-    action: string,
-    name: string,
-    rel: string,
-    form_method: string,
-    enctype: string
-  ) {
-    this.fields = fields;
-    this.action = action;
-    this.name = name;
-    this.rel = rel;
-    this.form_method = form_method;
-    this.enctype = enctype;
-  }
-
-  getField(field: string): IField | undefined {
-    return this.fields[field];
-  }
-
-  getFieldSafe(field: string): IField {
-    const f = this.fields[field];
-    if(!f) throw new Error(`Missing field ${f} in form fields ${this.fields}`);
-    return f;
-  }
-}
-
-export interface ISearchForm {
-  api: IApi;
-  form: IForm;
+export class SearchForm {
+  api: Api;
+  form: Form;
   data: any;
 
-  set(field: string, value: any): ISearchForm;
-  ref(ref: string): ISearchForm;
-  query(query: string | string[]): ISearchForm;
-  pageSize(size: number): ISearchForm;
-  fetch(fields: string | string[]): ISearchForm;
-  fetchLinks(fields: string | string[]): ISearchForm;
-  lang(langCode: string): ISearchForm;
-  page(p: number): ISearchForm;
-  orderings(orderings ?: string[]): ISearchForm;
-  submit(callback: (error: Error | null, response: IApiResponse, xhr: any) => void): any;
-}
-
-export class SearchForm implements ISearchForm {
-  api: IApi;
-  form: IForm;
-  data: any;
-
-  constructor(api: IApi, form: IForm, data: any) {
+  constructor(api: Api, form: Form, data: any) {
     this.api = api;
     this.form = form;
     this.data = data || {};
 
     for(var field in form.fields) {
-      if(form.getFieldSafe(field)['default']) {
-        this.data[field] = [form.fields[field]['default']];
+      const fieldDesc = form.fields[field];
+      if(!fieldDesc) throw new Error(`Missing field ${field} in form fields ${form.fields}`);
+      if(fieldDesc['default']) {
+        this.data[field] = [fieldDesc['default']];
       }
     }
   }
 
-  set(field: string, value: any): ISearchForm {
-    const fieldDesc = this.form.getField(field);
-
-    if(!fieldDesc) throw new Error("Unknown field " + field);
+  set(field: string, value: any): SearchForm {
+    const fieldDesc = this.form.fields[field];
+    if(!fieldDesc) throw new Error(`Missing field ${field} in form fields ${this.form.fields}`);
 
     const checkedValue = value === '' || value === undefined ? null : value;
     let values = this.data[field] || [];
@@ -140,7 +68,7 @@ export class SearchForm implements ISearchForm {
    * method to call before calling submit(), and api.form('everything').submit()
    * will not work.
    */
-  ref(ref: string): ISearchForm {
+  ref(ref: string): SearchForm {
     return this.set("ref", ref);
   }
 
@@ -148,7 +76,7 @@ export class SearchForm implements ISearchForm {
    * Sets a predicate-based query for this SearchForm. This is where you
    * paste what you compose in your prismic.io API browser.
    */
-  query(query: string | string[]): ISearchForm {
+  query(query: string | string[]): SearchForm {
     if (typeof query === 'string') {
       return this.query([query]);
     } else if(query instanceof Array) {
@@ -164,14 +92,14 @@ export class SearchForm implements ISearchForm {
    * @param {number} size - The page size
    * @returns {SearchForm} - The SearchForm itself
    */
-  pageSize(size: number): ISearchForm {
+  pageSize(size: number): SearchForm {
     return this.set("pageSize", size);
   }
 
   /**
    * Restrict the results document to the specified fields
    */
-  fetch(fields: string | string[]): ISearchForm {
+  fetch(fields: string | string[]): SearchForm {
     const strFields = fields instanceof Array ? fields.join(",") : fields;
     return this.set("fetch", strFields);
   }
@@ -179,7 +107,7 @@ export class SearchForm implements ISearchForm {
   /**
    * Include the requested fields in the DocumentLink instances in the result
    */
-  fetchLinks(fields: string | string[]): ISearchForm {
+  fetchLinks(fields: string | string[]): SearchForm {
     const strFields = fields instanceof Array ? fields.join(",") : fields;
     return this.set("fetchLinks", strFields);
   }
@@ -194,14 +122,14 @@ export class SearchForm implements ISearchForm {
   /**
    * Sets the page number to query for this SearchForm. This is an optional method.
    */
-  page(p: number): ISearchForm {
+  page(p: number): SearchForm {
     return this.set("page", p);
   }
 
   /**
    * Sets the orderings to query for this SearchForm. This is an optional method.
    */
-  orderings(orderings ?: string[]): ISearchForm {
+  orderings(orderings ?: string[]): SearchForm {
     if (!orderings) {
       return this;
     } else {
@@ -212,7 +140,7 @@ export class SearchForm implements ISearchForm {
   /**
    * Submits the query, and calls the callback function.
    */
-  submit(callback: (error: Error | null, response: IApiResponse, xhr: any) => void): any {
+  submit(callback: (error: Error | null, response: ApiResponse, xhr: any) => void): any {
     let url = this.form.action;
     if (this.data) {
       let sep = (url.indexOf('?') > -1 ? '&' : '?');
@@ -232,7 +160,7 @@ export class SearchForm implements ISearchForm {
   }
 }
 
-export interface IApiResponse {
+export interface ApiResponse {
   page: number;
   results_per_page: number;
   results_size: number;
@@ -243,38 +171,7 @@ export interface IApiResponse {
   results: IDocument[];
 }
 
-export class ApiResponse {
-  page: number;
-  results_per_page: number;
-  results_size: number;
-  total_results_size: number;
-  total_pages: number;
-  next_page: string;
-  prev_page: string;
-  results: IDocument[];
-
-  constructor(
-    page: number,
-    results_per_page: number,
-    results_size: number,
-    total_results_size: number,
-    total_pages: number,
-    next_page: string,
-    prev_page: string,
-    results: IDocument[]
-  ) {
-    this.page = page;
-    this.results_per_page = results_per_page;
-    this.results_size = results_size;
-    this.total_results_size = total_results_size;
-    this.total_pages = total_pages;
-    this.next_page = next_page;
-    this.prev_page = prev_page;
-    this.results = results;
-  }
-}
-
-export interface IApiOptions {
+export interface ApiOptions {
   accessToken: string;
   complete?: (err: Error | null, value?: any, xhr?: any) => void;
   requestHandler?: IRequestHandler;
@@ -283,7 +180,7 @@ export interface IApiOptions {
   apiDataTTL?: number;
 }
 
-export interface IApi {
+export class Api {
   url: string;
   accessToken: string;
   req: any;
@@ -297,46 +194,13 @@ export interface IApi {
   types: object;
   tags: string[];
   data: any;
-  forms: IForm[];
+  forms: Form[];
   oauthInitiate: string;
   oauthToken: string;
   quickRoutes: any;
 
-  get(callback: (err: Error | null, value?: any, xhr?: any, ttl?: number) => void): Promise<IApi>;
-  request(url: string, callback: (err: Error | null, results: IApiResponse | null, xhr?: any) => void): PromiseLike<IApiResponse>;
-  refresh(callback: (err: Error | null | undefined, data: any, xhr: any) => void): PromiseLike<IApiResponse>;
-  parse(data: any): object;
-  form(formId: string): ISearchForm | null;
-  everything(): ISearchForm;
-  master(): string;
-  ref(label: string): string | null;
-  currentExperiment(): IExperiment | null;
-  quickRoutesEnabled(): boolean;
-  getQuickRoutes(callback: (err: Error, data: any, xhr: any) => void): Promise<any>;
-  query(q: string | string[], optionsOrCallback: object | ((err: Error | null, response?: any) => void), cb: (err: Error | null, response?: any) => void): Promise<IApiResponse>;
-}
-
-export class Api implements IApi {
-  url: string;
-  accessToken: string;
-  req: any;
-  apiCacheKey: string;
-  apiCache: IApiCache;
-  apiDataTTL: number;
-  requestHandler: IRequestHandler;
-  experiments: IExperiments;
-  bookmarks: string[];
-  refs: Ref[];
-  types: object;
-  tags: string[];
-  data: any;
-  forms: IForm[];
-  oauthInitiate: string;
-  oauthToken: string;
-  quickRoutes: any;
-
-  constructor(url: string, options: IApiOptions) {
-    const opts: IApiOptions = options || {};
+  constructor(url: string, options: ApiOptions) {
+    const opts: ApiOptions = options || {};
     this.accessToken = opts.accessToken;
     this.url = url + (this.accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + this.accessToken : '');
     this.req = opts.req;
@@ -351,7 +215,7 @@ export class Api implements IApi {
    * present, otherwise from calling the prismic api endpoint (which is
    * then cached).
    */
-  get(callback: (err: Error | null, value?: any, xhr?: any, ttl?: number) => void): Promise<IApi> {
+  get(callback: (err: Error | null, value?: any, xhr?: any, ttl?: number) => void): Promise<Api> {
     const cacheKey = this.apiCacheKey;
 
     return new Promise((resolve, reject) => {
@@ -389,7 +253,7 @@ export class Api implements IApi {
    * @param {function} callback - Optional callback function that is called after the data has been refreshed
    * @returns {Promise}
    */
-  refresh(callback: (err: Error | null | undefined, data: any, xhr: any) => void): PromiseLike<IApiResponse> {
+  refresh(callback: (err: Error | null | undefined, data: any, xhr: any) => void): PromiseLike<ApiResponse> {
     const cacheKey = this.apiCacheKey;
 
     return new Promise(function(resolve, reject) {
@@ -426,22 +290,13 @@ export class Api implements IApi {
     // Parse the forms
     const forms = Object.keys(data.forms || []).reduce((acc: any, key: string, i: number) => {
       if (data.forms.hasOwnProperty(key)) {
-        const f = data.forms[key];
+        const form = data.forms[key] as Form;
 
         if(this.accessToken) {
-          f.fields['access_token'] = {};
-          f.fields['access_token']['type'] = 'string';
-          f.fields['access_token']['default'] = this.accessToken;
+          form.fields['access_token'] = {};
+          form.fields['access_token']['type'] = 'string';
+          form.fields['access_token']['default'] = this.accessToken;
         }
-
-        const form = new Form(
-          f.fields,
-          f.action,
-          f.name,
-          f.rel,
-          f.form_method,
-          f.enctype
-        );
 
         acc[key] = form;
         return acc;
@@ -450,35 +305,25 @@ export class Api implements IApi {
       }
     }, {});
 
-    const refs = data.refs.map((r: any) => {
-      return new Ref(
-        r.ref,
-        r.label,
-        r.isMasterRef,
-        r.scheduledAt,
-        r.id
-      );
-    }) || [];
+    const refs: Ref[] = data.refs || [];
 
-    const master = refs.filter((r: any) => {
-      return r.isMaster === true;
-    });
+    const master = refs.filter(r => r.isMaster)[0];
 
     const types = data.types;
 
     const tags = data.tags;
 
-    if (master.length === 0) {
+    if (master) {
       throw ("No master ref.");
     }
 
     return {
       bookmarks: data.bookmarks || {},
-      refs: refs,
-      forms: forms,
-      master: master[0],
-      types: types,
-      tags: tags,
+      refs,
+      forms,
+      master,
+      types,
+      tags,
       experiments: data.experiments,
       oauthInitiate: data['oauth_initiate'],
       oauthToken: data['oauth_token'],
@@ -491,7 +336,7 @@ export class Api implements IApi {
    * For instance: api.form("everything") works on every repository (as "everything" exists by default)
    * You can then chain the calls: api.form("everything").query('[[:d = at(document.id, "UkL0gMuvzYUANCpf")]]').ref(ref).submit()
    */
-  form(formId: string): ISearchForm | null {
+  form(formId: string): SearchForm | null {
     var form = this.data.forms[formId];
     if(form) {
       return new SearchForm(this, form, {});
@@ -499,7 +344,7 @@ export class Api implements IApi {
     return null;
   }
 
-  everything(): ISearchForm {
+  everything(): SearchForm {
     const f = this.form("everything");
     if(!f) throw new Error("Missing everything form");
     return f;
@@ -555,7 +400,7 @@ export class Api implements IApi {
   /**
    * Query the repository
    */
-  query(q: string | string[], optionsOrCallback: object | ((err: Error | null, response?: any) => void), cb: (err: Error | null, response?: any) => void): Promise<IApiResponse> {
+  query(q: string | string[], optionsOrCallback: object | ((err: Error | null, response?: any) => void), cb: (err: Error | null, response?: any) => void): Promise<ApiResponse> {
         const {options, callback} = typeof optionsOrCallback === 'function'
       ? {options: {}, callback: optionsOrCallback}
       : {options: optionsOrCallback || {}, callback: cb};
@@ -687,7 +532,7 @@ export class Api implements IApi {
           if (!mainDocumentId) {
             cb(null, defaultUrl, xhr);
           } else {
-            api.everything().query(Predicates.at("document.id", mainDocumentId)).ref(token).lang('*').submit(function(err: Error, response: IApiResponse) {
+            api.everything().query(Predicates.at("document.id", mainDocumentId)).ref(token).lang('*').submit(function(err: Error, response: ApiResponse) {
               if (err) {
                 cb(err);
               }
@@ -712,14 +557,14 @@ export class Api implements IApi {
   /**
    * Fetch a URL corresponding to a query, and parse the response as a Response object
    */
-  request(url: string, callback: (err: Error | null, results: IApiResponse | null, xhr?: any) => void): PromiseLike<IApiResponse> {
+  request(url: string, callback: (err: Error | null, results: ApiResponse | null, xhr?: any) => void): PromiseLike<ApiResponse> {
     var api = this;
     var cacheKey = url + (this.accessToken ? ('#' + this.accessToken) : '');
     var cache = this.apiCache;
-    function run(cb: (err: Error | null, results: IApiResponse | null, xhr?: any) => void) {
-      cache.get(cacheKey, function (err: Error, value: string) {
+    function run(cb: (err: Error | null, results: ApiResponse | null, xhr?: any) => void) {
+      cache.get(cacheKey, function (err: Error, value: any) {
         if (err || value) {
-          cb(err, api.response(value));
+          cb(err, value as ApiResponse);
           return;
         }
         api.requestHandler.request(url, function(err: Error, documents: any, xhr: any, ttl?: number) {
@@ -730,10 +575,10 @@ export class Api implements IApi {
 
           if (ttl) {
             cache.set(cacheKey, documents, ttl, function (err: Error) {
-              cb(err, api.response(documents));
+              cb(err, documents as ApiResponse);
             });
           } else {
-            cb(null, api.response(documents));
+            cb(null, documents as ApiResponse);
           }
         });
       });
@@ -747,22 +592,7 @@ export class Api implements IApi {
     });
   }
 
-  getNextPage(nextPage: number, callback: (err: Error | null, results: IApiResponse | null, xhr?: any) => void) {
+  getNextPage(nextPage: number, callback: (err: Error | null, results: ApiResponse | null, xhr?: any) => void) {
     return this.request(nextPage + (this.accessToken ? '&access_token=' + this.accessToken : ''), callback);
-  }
-
-  /**
-   * JSON documents to Response object
-   */
-  response(documents: any){
-    return new ApiResponse(
-      documents.page,
-      documents.results_per_page,
-      documents.results_size,
-      documents.total_results_size,
-      documents.total_pages,
-      documents.next_page,
-      documents.prev_page,
-      documents.results || []);
   }
 }
