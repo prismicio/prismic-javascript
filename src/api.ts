@@ -1,9 +1,10 @@
 import { Predicates } from '@root/predicates';
 import { IExperiments, IExperiment, Experiments } from '@root/experiments';
 import { IRequestHandler, DefaultRequestHandler } from '@root/request';
-import { IDocument } from '@root/documents';
-import { IApiCache, DefaultApiCache } from '@root/cache';
+import { Document } from '@root/documents';
+import { ApiCache, DefaultApiCache } from '@root/cache';
 import Cookies from '@root/cookies';
+
 export const PreviewCookie = "io.prismic.preview";
 export const ExperimentCookie = "io.prismic.experiment";
 
@@ -168,7 +169,7 @@ export interface ApiResponse {
   total_pages: number;
   next_page: string;
   prev_page: string;
-  results: IDocument[];
+  results: Document[];
 }
 
 export interface ApiOptions {
@@ -176,7 +177,7 @@ export interface ApiOptions {
   complete?: (err: Error | null, value?: any, xhr?: any) => void;
   requestHandler?: IRequestHandler;
   req?: any;
-  apiCache?: IApiCache;
+  apiCache?: ApiCache;
   apiDataTTL?: number;
 }
 
@@ -185,7 +186,7 @@ export class Api {
   accessToken: string;
   req: any;
   apiCacheKey: string;
-  apiCache: IApiCache;
+  apiCache: ApiCache;
   apiDataTTL: number;
   requestHandler: IRequestHandler;
   experiments: IExperiments;
@@ -592,7 +593,7 @@ export class Api {
     });
   }
 
-  getNextPage(nextPage: number, callback: (err: Error | null, results: ApiResponse | null, xhr?: any) => void) {
+  getNextPage(nextPage: number, callback: (err: Error | null, results: ApiResponse | null, xhr?: any) => void) { // TODO ?
     return this.request(nextPage + (this.accessToken ? '&access_token=' + this.accessToken : ''), callback);
   }
 }

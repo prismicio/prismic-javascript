@@ -1,7 +1,7 @@
 import { IExperiments, IExperiment } from '@root/experiments';
 import { IRequestHandler } from '@root/request';
-import { IDocument } from '@root/documents';
-import { IApiCache } from '@root/cache';
+import { Document } from '@root/documents';
+import { ApiCache } from '@root/cache';
 export declare const PreviewCookie = "io.prismic.preview";
 export declare const ExperimentCookie = "io.prismic.experiment";
 export interface Ref {
@@ -80,14 +80,14 @@ export interface ApiResponse {
     total_pages: number;
     next_page: string;
     prev_page: string;
-    results: IDocument[];
+    results: Document[];
 }
 export interface ApiOptions {
     accessToken: string;
     complete?: (err: Error | null, value?: any, xhr?: any) => void;
     requestHandler?: IRequestHandler;
     req?: any;
-    apiCache?: IApiCache;
+    apiCache?: ApiCache;
     apiDataTTL?: number;
 }
 export declare class Api {
@@ -95,7 +95,7 @@ export declare class Api {
     accessToken: string;
     req: any;
     apiCacheKey: string;
-    apiCache: IApiCache;
+    apiCache: ApiCache;
     apiDataTTL: number;
     requestHandler: IRequestHandler;
     experiments: IExperiments;
