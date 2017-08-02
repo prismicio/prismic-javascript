@@ -1,4 +1,4 @@
-import { LRUCache, MakeLRUCache } from '@root/lru';
+import { LRUCache } from '@root/lru';
 
 export interface ApiCache {
   isExpired(key: String): boolean;
@@ -11,8 +11,8 @@ export interface ApiCache {
 export class DefaultApiCache implements ApiCache {
   lru: LRUCache;
 
-  constructor(limit ?: number) {
-    this.lru = MakeLRUCache(limit);
+  constructor(limit: number) {
+    this.lru = new LRUCache(limit);
   }
 
   isExpired(key: string): boolean {

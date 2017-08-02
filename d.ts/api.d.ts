@@ -1,4 +1,4 @@
-import { IExperiments, IExperiment } from '@root/experiments';
+import { Experiment, Experiments } from '@root/experiments';
 import { IRequestHandler } from '@root/request';
 import { Document } from '@root/documents';
 import { ApiCache } from '@root/cache';
@@ -98,7 +98,7 @@ export declare class Api {
     apiCache: ApiCache;
     apiDataTTL: number;
     requestHandler: IRequestHandler;
-    experiments: IExperiments;
+    experiments: Experiments;
     bookmarks: string[];
     refs: Ref[];
     types: object;
@@ -153,7 +153,7 @@ export declare class Api {
     /**
      * The current experiment, or null
      */
-    currentExperiment(): IExperiment | null;
+    currentExperiment(): Experiment | null;
     quickRoutesEnabled(): boolean;
     /**
      * Retrieve quick routes definitions

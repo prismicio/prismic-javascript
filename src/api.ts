@@ -1,5 +1,5 @@
 import { Predicates } from '@root/predicates';
-import { IExperiments, IExperiment, Experiments } from '@root/experiments';
+import { Experiment, Experiments } from '@root/experiments';
 import { IRequestHandler, DefaultRequestHandler } from '@root/request';
 import { Document } from '@root/documents';
 import { ApiCache, DefaultApiCache } from '@root/cache';
@@ -189,7 +189,7 @@ export class Api {
   apiCache: ApiCache;
   apiDataTTL: number;
   requestHandler: IRequestHandler;
-  experiments: IExperiments;
+  experiments: Experiments;
   bookmarks: string[];
   refs: Ref[];
   types: object;
@@ -205,7 +205,7 @@ export class Api {
     this.accessToken = opts.accessToken;
     this.url = url + (this.accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + this.accessToken : '');
     this.req = opts.req;
-    this.apiCache = opts.apiCache || new DefaultApiCache();
+    this.apiCache = opts.apiCache || new DefaultApiCache(1000);
     this.requestHandler = opts.requestHandler || new DefaultRequestHandler();
     this.apiCacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
     this.apiDataTTL = opts.apiDataTTL || 5;
@@ -377,7 +377,7 @@ export class Api {
   /**
    * The current experiment, or null
    */
-  currentExperiment(): IExperiment | null {
+  currentExperiment(): Experiment | null {
     return this.experiments.current();
   }
 

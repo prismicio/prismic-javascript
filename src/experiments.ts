@@ -1,89 +1,33 @@
-export interface IExperiment {
-  variations: IVariation[];
-  data: any;
-
-  id(): string;
-  googleId(): string;
-  name(): string;
+export interface Variation {
+  id: string;
+  ref: string;
+  label: string;
 }
 
-export interface IVariation {
-  data: any;
-
-  id(): string;
-  ref(): string;
-  label(): string;
+export interface Experiment {
+  id: string;
+  googleId: string;
+  name: string;
+  variations: Variation[]
 }
 
-export interface IExperiments {
-  drafts: IExperiment[];
-  running: IExperiment[];
-
-  current(): IExperiment | null;
-  refFromCookie(cookie: string): string | null;
-}
-
-export class Variation implements IVariation {
-  data: any = {};
-
-  constructor(data: any) {
-    this.data = data;
-  }
-
-  id(): string {
-    return this.data.id;
-  }
-
-  ref(): string {
-    return this.data.ref;
-  }
-
-  label(): string {
-    return this.data.label;
-  }
-}
-
-export class Experiment implements IExperiment {
-  variations: IVariation[];
-  data: any = {};
-
-  constructor(data: any) {
-    this.data = data;
-    this.variations = (data.variations || []).map((v: any) => {
-      return new Variation(v);
-    });
-  }
-
-  id(): string {
-    return this.data.id;
-  }
-
-  googleId(): string {
-    return this.data.googleId;
-  }
-
-  name(): string {
-    return this.data.name;
-  }
-}
 export class Experiments {
-  drafts: IExperiment[];
-  running: IExperiment[];
+  drafts: Experiment[];
+  running: Experiment[];
 
   constructor(data: any) {
     if(data) {
-      this.drafts = (data.drafts || []).map((exp: any) => {
-        return new Experiment(exp);
-      });
+      this.drafts = (data.drafts || []) as Experiment[];
       this.running = (data.running || []).map((exp: any) => {
         return new Experiment(exp);
       });
     }
   }
 
-  current(): IExperiment | null {
+  current(): Experiment | null {
     return this.running.length > 0 ? this.running[0] : null;
   }
+
   refFromCookie(cookie: string): string | null {
     if (!cookie || cookie.trim() === "") return null;
     const splitted = cookie.trim().split(" ");
@@ -93,6 +37,6 @@ export class Experiments {
     const exp = this.running.filter(function(exp) {
       return exp.googleId() == expId && exp.variations.length > varIndex;
     })[0];
-    return exp ? exp.variations[varIndex].ref() : null;
+    return exp ? exp.variations[varIndex].ref : null;
   }
 }
