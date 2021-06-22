@@ -27,7 +27,6 @@ export default class Api {
     this.options = options || {};
     this.url = url;
     const queryStrings = [
-      this.options.accessToken && `access_token=${this.options.accessToken}`,
       this.options.routes && `routes=${encodeURIComponent(JSON.stringify(this.options.routes))}`
     ]
     .filter(Boolean)
@@ -42,6 +41,7 @@ export default class Api {
       this.options.apiCache,
       this.options.proxyAgent,
       this.options.timeoutInMs,
+      this.options.accessToken,
     );
   }
 
