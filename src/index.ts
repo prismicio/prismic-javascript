@@ -17,14 +17,14 @@ export * as cookie from "./cookie";
 // Custom Types API.
 export {
 	createCustomTypesClient,
-	CustomTypesClient
+	CustomTypesClient,
 } from "./customTypesClient";
 
 // General types used throughout the project. These are made public to allow users to better type their projects.
 export type { ClientConfig } from "./client";
 export type {
 	CustomTypesClientConfig,
-	CustomTypesAPIParams
+	CustomTypesAPIParams,
 } from "./customTypesClient";
 export type {
 	CustomType,

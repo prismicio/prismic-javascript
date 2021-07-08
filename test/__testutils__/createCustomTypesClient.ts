@@ -6,7 +6,7 @@ import * as prismic from "../../src";
 
 export const createCustomTypesClient = (
 	t: ava.ExecutionContext,
-	options?: prismic.ClientConfig
+	options?: prismic.ClientConfig,
 ): prismic.CustomTypesClient => {
 	const repositoryName = crypto.createHash("md5").update(t.title).digest("hex");
 	const token = "token";
@@ -16,7 +16,7 @@ export const createCustomTypesClient = (
 		repositoryName,
 		token,
 		endpoint,
-		...options
+		...options,
 	};
 
 	return prismic.createCustomTypesClient(resolvedOptions);

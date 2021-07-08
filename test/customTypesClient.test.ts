@@ -9,22 +9,22 @@ const server = mswNode.setupServer();
 test.before(() => server.listen({ onUnhandledRequest: "error" }));
 test.after(() => server.close());
 
-test("createClient creates a CustomTypesClient", t => {
+test("createClient creates a CustomTypesClient", (t) => {
 	const client = prismic.createCustomTypesClient({
 		repositoryName: "qwerty",
 		token: "token",
-		fetch: sinon.stub()
+		fetch: sinon.stub(),
 	});
 
 	t.true(client instanceof prismic.CustomTypesClient);
 });
 
-test("client has correct default state", t => {
+test("client has correct default state", (t) => {
 	const options = {
 		repositoryName: "qwerty",
 		token: "token",
 		fetch: sinon.stub(),
-		endpoint: "https://example.com"
+		endpoint: "https://example.com",
 	};
 	const client = prismic.createCustomTypesClient(options);
 
@@ -34,20 +34,20 @@ test("client has correct default state", t => {
 	t.is(client.endpoint, options.endpoint);
 });
 
-test("constructor throws if fetch is unavailable", t => {
+test("constructor throws if fetch is unavailable", (t) => {
 	t.throws(
 		() =>
 			prismic.createCustomTypesClient({
 				repositoryName: "qwerty",
-				token: "token"
+				token: "token",
 			}),
 		{
-			message: /fetch implementation was not provided/
-		}
+			message: /fetch implementation was not provided/,
+		},
 	);
 });
 
-test("uses globalThis.fetch if available", async t => {
+test("uses globalThis.fetch if available", async (t) => {
 	const responseBody = { foo: "bar" };
 
 	const existingFetch = globalThis.fetch;
@@ -58,7 +58,7 @@ test("uses globalThis.fetch if available", async t => {
 
 	const client = prismic.createCustomTypesClient({
 		repositoryName: "qwerty",
-		token: "token"
+		token: "token",
 	});
 	const fetchResponse = await client.fetchFn("");
 	const jsonResponse = await fetchResponse.json();

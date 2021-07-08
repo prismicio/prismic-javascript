@@ -123,7 +123,7 @@ export interface Route {
 }
 
 export interface CustomType<
-	TCustomTypeModel extends prismicT.CustomTypeModel = prismicT.CustomTypeModel
+	TCustomTypeModel extends prismicT.CustomTypeModel = prismicT.CustomTypeModel,
 > {
 	id: string;
 	label: string;

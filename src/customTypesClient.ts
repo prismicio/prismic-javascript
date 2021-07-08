@@ -5,7 +5,7 @@ import { MissingFetchError } from "./MissingFetchError";
 import { PrismicError } from "./PrismicError";
 
 const isForbiddenErrorAPIResponse = (
-	input: unknown
+	input: unknown,
 ): input is ForbiddenErrorAPIResponse => {
 	return typeof input === "object" && input !== null && "message" in input;
 };
@@ -64,7 +64,7 @@ export type CustomTypesAPIParams = {
 const createPostFetchRequestInit = <T>(body: T): RequestInitLike => {
 	return {
 		method: "post",
-		body: JSON.stringify(body)
+		body: JSON.stringify(body),
 	};
 };
 
@@ -113,21 +113,21 @@ export class CustomTypesClient {
 	}
 
 	async getAll<TCustomTypeModel extends prismicT.CustomTypeModel>(
-		params?: CustomTypesAPIParams
+		params?: CustomTypesAPIParams,
 	): Promise<CustomType<TCustomTypeModel>[]> {
 		return await this.fetch<CustomType<TCustomTypeModel>[]>("", params);
 	}
 
 	async getByID<TCustomTypeModel extends prismicT.CustomTypeModel>(
 		id: string,
-		params?: CustomTypesAPIParams
+		params?: CustomTypesAPIParams,
 	): Promise<CustomType<TCustomTypeModel>> {
 		return await this.fetch<CustomType<TCustomTypeModel>>(id, params);
 	}
 
 	async insert<TCustomTypeModel extends prismicT.CustomTypeModel>(
 		customType: CustomType<TCustomTypeModel>,
-		params?: CustomTypesAPIParams
+		params?: CustomTypesAPIParams,
 	): Promise<CustomType<TCustomTypeModel>> {
 		await this.fetch("insert", params, createPostFetchRequestInit(customType));
 
@@ -136,7 +136,7 @@ export class CustomTypesClient {
 
 	async update<TCustomTypeModel extends prismicT.CustomTypeModel>(
 		customType: CustomType<TCustomTypeModel>,
-		params?: CustomTypesAPIParams
+		params?: CustomTypesAPIParams,
 	): Promise<CustomType<TCustomTypeModel>> {
 		await this.fetch("update", params, createPostFetchRequestInit(customType));
 
@@ -145,7 +145,7 @@ export class CustomTypesClient {
 
 	async remove<TCustomTypeID extends string>(
 		id: TCustomTypeID,
-		params?: CustomTypesAPIParams
+		params?: CustomTypesAPIParams,
 	): Promise<TCustomTypeID> {
 		await this.fetch(id, params, { method: "delete" });
 
@@ -153,26 +153,26 @@ export class CustomTypesClient {
 	}
 
 	async getAllSharedSlices<TSharedSliceModel extends prismicT.SharedSliceModel>(
-		params?: CustomTypesAPIParams
+		params?: CustomTypesAPIParams,
 	): Promise<TSharedSliceModel[]> {
 		return await this.fetch<TSharedSliceModel[]>("slices", params);
 	}
 
 	async getSharedSliceByID<TSharedSliceModel extends prismicT.SharedSliceModel>(
 		id: string,
-		params?: CustomTypesAPIParams
+		params?: CustomTypesAPIParams,
 	): Promise<TSharedSliceModel> {
 		return await this.fetch<TSharedSliceModel>(`slices/${id}`, params);
 	}
 
 	async insertSharedSlice<TSharedSliceModel extends prismicT.SharedSliceModel>(
 		slice: TSharedSliceModel,
-		params?: CustomTypesAPIParams
+		params?: CustomTypesAPIParams,
 	): Promise<TSharedSliceModel> {
 		await this.fetch(
 			"slices/insert",
 			params,
-			createPostFetchRequestInit(slice)
+			createPostFetchRequestInit(slice),
 		);
 
 		return slice;
@@ -180,12 +180,12 @@ export class CustomTypesClient {
 
 	async updateSharedSlice<TSharedSliceModel extends prismicT.SharedSliceModel>(
 		slice: TSharedSliceModel,
-		params?: CustomTypesAPIParams
+		params?: CustomTypesAPIParams,
 	): Promise<TSharedSliceModel> {
 		await this.fetch(
 			"slices/update",
 			params,
-			createPostFetchRequestInit(slice)
+			createPostFetchRequestInit(slice),
 		);
 
 		return slice;
@@ -193,10 +193,10 @@ export class CustomTypesClient {
 
 	async removeSharedSlice<TSharedSliceID extends string>(
 		id: TSharedSliceID,
-		params?: CustomTypesAPIParams
+		params?: CustomTypesAPIParams,
 	): Promise<TSharedSliceID> {
 		await this.fetch(`slices/${id}`, params, {
-			method: "delete"
+			method: "delete",
 		});
 
 		return id;
@@ -214,20 +214,20 @@ export class CustomTypesClient {
 	private async fetch<T = unknown>(
 		path: string,
 		params: Partial<CustomTypesAPIParams> = {},
-		requestOptions: RequestInitLike = {}
+		requestOptions: RequestInitLike = {},
 	): Promise<T> {
 		const url = new URL(
 			path,
-			`${params.endpoint || this.endpoint}/`
+			`${params.endpoint || this.endpoint}/`,
 		).toString();
 
 		const res = await this.fetchFn(url.toString(), {
 			headers: {
 				"Content-Type": "application/json",
 				repository: params.repositoryName || this.repositoryName,
-				Authorization: `Bearer ${params.token || this.token}`
+				Authorization: `Bearer ${params.token || this.token}`,
 			},
-			...requestOptions
+			...requestOptions,
 		});
 
 		switch (res.status) {
@@ -268,7 +268,7 @@ export class CustomTypesClient {
 			// - Insert a Shared Slice with same ID as an existing Shared Slice
 			case 409: {
 				throw new ConflictError(
-					"The provided ID is already used. A unique ID must be provided."
+					"The provided ID is already used. A unique ID must be provided.",
 				);
 			}
 
@@ -277,7 +277,7 @@ export class CustomTypesClient {
 			// - Update a Shared Slice with no matching ID
 			case 422: {
 				throw new NotFoundError(
-					"An entity with a matching ID could not be found."
+					"An entity with a matching ID could not be found.",
 				);
 			}
 		}

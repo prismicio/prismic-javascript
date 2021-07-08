@@ -12,7 +12,7 @@ const server = mswNode.setupServer();
 test.before(() => server.listen({ onUnhandledRequest: "error" }));
 test.after(() => server.close());
 
-test("returns all custom types", async t => {
+test("returns all custom types", async (t) => {
 	const queryResponse = [createCustomTypeMetadata()];
 
 	const client = createCustomTypesClient(t);
@@ -28,7 +28,7 @@ test("returns all custom types", async t => {
 			}
 
 			return res(ctx.json(queryResponse));
-		})
+		}),
 	);
 
 	const res = await client.getAll();
@@ -36,11 +36,11 @@ test("returns all custom types", async t => {
 	t.deepEqual(res, queryResponse);
 });
 
-test("includes params if provided", async t => {
+test("includes params if provided", async (t) => {
 	const params: Required<prismic.CustomTypesAPIParams> = {
 		repositoryName: "custom-repositoryName",
 		token: "custom-token",
-		endpoint: "https://custom-endpoint.com/custom-path"
+		endpoint: "https://custom-endpoint.com/custom-path",
 	};
 	const queryResponse = [createCustomTypeMetadata()];
 
@@ -55,7 +55,7 @@ test("includes params if provided", async t => {
 			}
 
 			return res(ctx.json(queryResponse));
-		})
+		}),
 	);
 
 	const client = createCustomTypesClient(t);
@@ -64,10 +64,10 @@ test("includes params if provided", async t => {
 	t.deepEqual(res, queryResponse);
 });
 
-test("merges params and default params if provided", async t => {
+test("merges params and default params if provided", async (t) => {
 	const params: prismic.CustomTypesAPIParams = {
 		repositoryName: "custom-repositoryName",
-		token: "custom-token"
+		token: "custom-token",
 	};
 	const queryResponse = [createCustomTypeMetadata()];
 
@@ -84,7 +84,7 @@ test("merges params and default params if provided", async t => {
 			}
 
 			return res(ctx.json(queryResponse));
-		})
+		}),
 	);
 
 	const res = await client.getAll(params);
